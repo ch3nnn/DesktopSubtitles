@@ -1,18 +1,27 @@
 package cn.ch3nnn.desktopsubtitle;
 
-
+import com.alibaba.nls.client.protocol.InputFormatEnum;
+import com.alibaba.nls.client.protocol.NlsClient;
+import com.alibaba.nls.client.protocol.SampleRateEnum;
+import com.alibaba.nls.client.protocol.asr.SpeechTranscriber;
+import com.alibaba.nls.client.protocol.asr.SpeechTranscriberListener;
+import com.alibaba.nls.client.protocol.asr.SpeechTranscriberResponse;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 
-/**
- * Created by yi-ge
- * 2018-12-21 23:46
- */
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.TargetDataLine;
+
+
 class Task implements Runnable {
     Label label;
 
-    private String appKey = "WwIo6BPuyCsOIoRE";
-    private String accessToken = "";
+    // TODO 填写 appKey accessToken
+
+    private String appKey = "hWBjM98oOgDeV4q3";
+    private String accessToken = "796bce879b74453cad11aa96cf422f5e";
     NlsClient client;
 
     public Task(Label label) {
@@ -20,83 +29,79 @@ class Task implements Runnable {
     }
 
     public SpeechTranscriberListener getTranscriberListener() {
-        SpeechTranscriberListener listener = new SpeechTranscriberListener() {
-            // 识别出中间结果.服务端识别出一个字或词时会返回此消息.仅当setEnableIntermediateResult(true)时,才会有此类消息返回
+
+        return new SpeechTranscriberListener() {
+            //识别出中间结果。仅当setEnableIntermediateResult为true时，才会返回该消息。
             @Override
             public void onTranscriptionResultChange(SpeechTranscriberResponse response) {
-                System.out.println("name: " + response.getName() +
-                        // 状态码 20000000 表示正常识别
+                System.out.println("task_id: " + response.getTaskId() +
+                        ", name: " + response.getName() +
+                        //状态码“20000000”表示正常识别。
                         ", status: " + response.getStatus() +
-                        // 句子编号，从1开始递增
+                        //句子编号，从1开始递增。
                         ", index: " + response.getTransSentenceIndex() +
-                        // 当前句子的中间识别结果
+                        //当前的识别结果。
                         ", result: " + response.getTransSentenceText() +
-                        // 当前已处理的音频时长，单位是毫秒
+                        //当前已处理的音频时长，单位为毫秒。
                         ", time: " + response.getTransSentenceTime());
 
-                final String r = response.getTransSentenceText();
-
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Update UI here.
-                        label.setText(r);
-                    }
-                });
+                Platform.runLater(() -> label.setText(response.getTransSentenceText()));
             }
 
             @Override
-            public void onTranscriberStart(SpeechTranscriberResponse speechTranscriberResponse) {
-
+            public void onTranscriberStart(SpeechTranscriberResponse response) {
+                //task_id是调用方和服务端通信的唯一标识，遇到问题时，需要提供此task_id。
+                System.out.println("task_id: " + response.getTaskId() + ", name: " + response.getName() + ", status: " + response.getStatus());
             }
 
             @Override
-            public void onSentenceBegin(SpeechTranscriberResponse speechTranscriberResponse) {
+            public void onSentenceBegin(SpeechTranscriberResponse response) {
+                System.out.println("task_id: " + response.getTaskId() + ", name: " + response.getName() + ", status: " + response.getStatus());
 
             }
 
-            // 识别出一句话.服务端会智能断句,当识别到一句话结束时会返回此消息
+            // 识别出一句话。服务端会智能断句，当识别到一句话结束时会返回此消息。
             @Override
             public void onSentenceEnd(SpeechTranscriberResponse response) {
-                System.out.println("name: " + response.getName() +
-                        // 状态码 20000000 表示正常识别
+                System.out.println("task_id: " + response.getTaskId() +
+                        ", name: " + response.getName() +
+                        //状态码“20000000”表示正常识别。
                         ", status: " + response.getStatus() +
-                        // 句子编号，从1开始递增
+                        //句子编号，从1开始递增。
                         ", index: " + response.getTransSentenceIndex() +
-                        // 当前句子的完整识别结果
+                        //当前的识别结果。
                         ", result: " + response.getTransSentenceText() +
-                        // 当前已处理的音频时长，单位是毫秒
-                        ", time: " + response.getTransSentenceTime() +
-                        // SentenceBegin事件的时间，单位是毫秒
-                        ", begin time: " + response.getSentenceBeginTime() +
-                        // 识别结果置信度，取值范围[0.0, 1.0]，值越大表示置信度越高
-                        ", confidence: " + response.getConfidence());
+                        //置信度
+                        ", confidence: " + response.getConfidence() +
+                        //开始时间
+                        ", begin_time: " + response.getSentenceBeginTime() +
+                        //当前已处理的音频时长，单位为毫秒。
+                        ", time: " + response.getTransSentenceTime());
 
-                final String r = response.getTransSentenceText();
+                // Platform.runLater(() -> label.setText(response.getTransSentenceText()));
 
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Update UI here.
-                        label.setText(r);
-                    }
-                });
             }
 
             // 识别完毕
             @Override
             public void onTranscriptionComplete(SpeechTranscriberResponse response) {
-                System.out.println("name: " + response.getName() +
-                        ", status: " + response.getStatus());
+                System.out.println("task_id: " + response.getTaskId() + ", name: " + response.getName() + ", status: " + response.getStatus());
             }
 
             @Override
-            public void onFail(SpeechTranscriberResponse speechTranscriberResponse) {
+            public void onSentenceSemantics(SpeechTranscriberResponse response) {
+                System.out.println("task_id: " + response.getTaskId() + ", name: " + response.getName() + ", status: " + response.getStatus());
 
             }
+
+            @Override
+            public void onFail(SpeechTranscriberResponse response) {
+                // task_id是调用方和服务端通信的唯一标识，遇到问题时，需要提供此task_id。
+                System.out.println("task_id: " + response.getTaskId() + ", status: " + response.getStatus() + ", status_text: " + response.getStatusText());
+            }
         };
-        return listener;
     }
+
 
     public void process() {
         SpeechTranscriber transcriber = null;
@@ -124,18 +129,10 @@ class Task implements Runnable {
             TargetDataLine targetDataLine = (TargetDataLine) AudioSystem.getLine(info);
             targetDataLine.open(audioFormat);
             targetDataLine.start();
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    // Update UI here.
-                    label.setText("You can speak now!");
-                }
-            });
-//            label.setText("You can speak now!");
-            int nByte = 0;
-            final int bufSize = 6400;
-            byte[] buffer = new byte[bufSize];
-            while ((nByte = targetDataLine.read(buffer, 0, bufSize)) > 0) {
+            Platform.runLater(() -> label.setText("You can speak now!"));
+            final int buffSize = 6400;
+            byte[] buffer = new byte[buffSize];
+            while (targetDataLine.read(buffer, 0, buffSize) > 0) {
                 // Step4 直接发送麦克风数据流
                 transcriber.send(buffer);
             }
@@ -152,9 +149,6 @@ class Task implements Runnable {
         }
     }
 
-//    public void shutdown() {
-//        client.shutdown();
-//    }
 
     @Override
     public void run() {

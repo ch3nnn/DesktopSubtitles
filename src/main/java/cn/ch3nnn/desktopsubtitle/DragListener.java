@@ -1,9 +1,5 @@
 package cn.ch3nnn.desktopsubtitle;
 
-/**
- * Created by yi-ge
- * 2018-12-21 22:13
- */
 
 import javafx.event.EventHandler;
 import javafx.scene.Node;
