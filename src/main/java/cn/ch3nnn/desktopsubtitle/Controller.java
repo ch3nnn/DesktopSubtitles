@@ -17,17 +17,18 @@ public class Controller implements Initializable {
 
 
     @FXML
-    private Label label;
+    public Label label;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
+
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().build();
         ExecutorService pool = new ThreadPoolExecutor(5, 200,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(1024), namedThreadFactory, new ThreadPoolExecutor.AbortPolicy());
-        pool.execute(new Task(label));
+        pool.execute(new StreamSpeechTask(label));
         pool.shutdown();
-
 
 
     }

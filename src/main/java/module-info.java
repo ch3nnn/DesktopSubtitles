@@ -15,6 +15,8 @@ module cn.ch3nnn.desktopsubtitle {
     requires nls.sdk.transcriber;
     requires fastjson;
     requires java.sql;
+    requires tyrus.standalone.client;
+    requires lombok;
     opens cn.ch3nnn.desktopsubtitle to javafx.fxml;
     exports cn.ch3nnn.desktopsubtitle;
 }
