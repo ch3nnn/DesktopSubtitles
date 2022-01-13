@@ -7,7 +7,7 @@
 实时语音识别的效果不错，可以用于在线小语种教学视频。
 
 #### 效果
-![image](https://dev-cdn.ch3nnn.cn/1642039479710824.gif)
+![image](https://github.com/ct437383389/DesktopSubtitles/blob/master/src/main/resources/1642039479710824.gif)
 
 #### 技术栈
 * 使用 JavaFx 实现透明窗口 + Label
